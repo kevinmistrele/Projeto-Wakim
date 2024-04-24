@@ -2,16 +2,62 @@ using System;
 using System.Data;
 using MySql.Data.MySqlClient;
 
-public class Secretaria
+public abstract class Secretaria
 {
-  public Secretaria(){}
-
-  public void ShowMenu(String key)
-  {
-    switch(key)
+    public void ShowMenu(string opcao)
     {
-    case "1":
-      {
+        switch (opcao)
+        {
+            case "1":
+                IncluirAluno();
+                break;
+            case "2":
+                AtualizarAluno();
+                break;
+            case "3":
+                RemoverAluno();
+                break;
+            case "4":
+                ConsultarAluno();
+                break;
+            default:
+                Console.WriteLine("Opção inválida!");
+                break;
+        }
+    }
+
+    protected abstract void IncluirAluno();
+    protected abstract void AtualizarAluno();
+    protected abstract void RemoverAluno();
+    protected abstract void ConsultarAluno();
+
+    protected void ExecuteScript(string sql)
+    {
+        using MySqlConnection con = new MySqlConnection("Persist Security Info=False;server=sql.freedb.tech;database=freedb_umc_dp_kevin;uid=freedb_kevinmistrele;pwd=$QSNfS53YNrEUtw");
+        try
+        {
+            con.Open();
+            Console.WriteLine($"MySQL version : {con.ServerVersion}");
+        }
+        catch (System.Exception e)
+        {
+            // Tratar exceção
+            Console.WriteLine(e.Message);
+        }
+
+        if (con.State == ConnectionState.Open)
+        {
+            Console.WriteLine("Connection Open!");
+            using MySqlCommand cmd = new MySqlCommand(sql, con);
+            cmd.ExecuteNonQuery();
+        }
+    }
+}
+
+public class MinhaSecretaria : Secretaria
+{
+    protected override void IncluirAluno()
+    {
         Aluno a = new Aluno();
         Console.WriteLine("+------------------------- ALUNO  --------------+");
         Console.WriteLine("¦                                               ¦");
@@ -48,16 +94,14 @@ public class Secretaria
         Console.WriteLine("Genero: ");		
         a.SetGenero(Console.ReadLine().ToString());
 
-                string sql = $"INSERT INTO ALUNO (Nome, Rgm, DataNascimento, Curso, Bolsista, Rg, Genero) VALUES ('{a.GetNome()}', '{a.GetRgm()}', '{a.GetDataNascimento()}', '{a.GetCurso()}', {a.GetBolsista()}, '{a.GetRg()}', '{a.GetGenero()}');";
+       string sql = $"INSERT INTO ALUNO (Nome, Rgm, DataNascimento, Curso, Bolsista, Rg, Genero) VALUES ('{a.GetNome()}', '{a.GetRgm()}', '{a.GetDataNascimento()}', '{a.GetCurso()}', {a.GetBolsista()}, '{a.GetRg()}', '{a.GetGenero()}');";
 
-                executeScript(sql);
+       ExecuteScript(sql);
+    }
 
-        break;
-
-        
-      }
-    case "2":{
-      Aluno a = new Aluno();
+    protected override void AtualizarAluno()
+    {
+        Aluno a = new Aluno();
       Console.WriteLine("+------------------------- ALUNO  --------------+");
       Console.WriteLine("¦                                               ¦");
       Console.WriteLine("¦     Forneca os dados atualizados do Aluno:    ¦");
@@ -95,12 +139,12 @@ public class Secretaria
 
       string sql = $"UPDATE ALUNO SET Rgm = '{a.GetRgm()}', DataNascimento = '{a.GetDataNascimento()}', Curso = '{a.GetCurso()}', Bolsista = {a.GetBolsista()}, Rg = '{a.GetRg()}', Genero = '{a.GetGenero()}' WHERE Nome =  '{a.GetNome()}' ";
 
-              executeScript(sql);
-
-      break;
+              ExecuteScript(sql);
     }
-    case "3":{
-      Aluno a = new Aluno();
+
+    protected override void RemoverAluno()
+    {
+        Aluno a = new Aluno();
         Console.WriteLine("+------------------------- ALUNO  --------------+");
         Console.WriteLine("¦                                               ¦");
         Console.WriteLine("¦    Forneca o nome do Aluno para remover:      ¦");
@@ -119,12 +163,13 @@ public class Secretaria
 
       string sql = $"DELETE FROM ALUNO WHERE Nome = '{a.GetNome()}'";
 
-      executeScript(sql);
+      ExecuteScript(sql);
 
-      break;
     }
-    case "4":{
-      Aluno a = new Aluno();
+
+    protected override void ConsultarAluno()
+    {
+       Aluno a = new Aluno();
         Console.WriteLine("+------------------------- ALUNO  --------------+");
         Console.WriteLine("¦                                               ¦");
         Console.WriteLine("¦   Forneca o nome do Aluno para consultar:     ¦");
@@ -160,34 +205,6 @@ public class Secretaria
           Console.WriteLine("Genero: " + dataReader["Genero"].ToString());
         }
 
-        executeScript(sql);
-
-        break;
+        ExecuteScript(sql);
     }
-      
-    }
-  }
-  public static void executeScript(string sql)
-  {
-        MySqlConnection con;
-        con = new MySqlConnection("Persist Security Info=False;server=sql.freedb.tech;database=freedb_umc_dp_kevin;uid=freedb_kevinmistrele;pwd=$QSNfS53YNrEUtw");
-        try
-        {
-            con.Open();
-            Console.WriteLine($"MySQL version : {con.ServerVersion}");
-        }
-        catch (System.Exception e)
-        {
-            //Console.WriteLine (e.Message.ToString());
-            //MessageBox.Show(e.Message.ToString());
-        }
-        //verifica se a conexão esta aberta
-        if (con.State == ConnectionState.Open)
-        {
-            Console.WriteLine("connection Open!");
-            using var cmd = new MySqlCommand(sql, con);
-            cmd.ExecuteNonQuery();
-        }
-    }
-
 }

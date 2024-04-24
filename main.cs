@@ -67,7 +67,7 @@ class Program
             {
                 case "1":
                     {
-                        Secretaria s = new Secretaria();
+                        Secretaria s = new MinhaSecretaria();
                         opcao = Singleton.GetInstance().showMenu("MENU_SECRETARIA");
                         s.ShowMenu(opcao);
                         break;
